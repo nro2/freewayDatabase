@@ -7,7 +7,7 @@
 import pymongo, sys, csv
 
 try:
-        ip = "35.235.127.249"
+        ip = "35.236.54.92"
         #ip = sys.argv[1]
 except:
         print("Must provide DB IP-Address as first argument")
@@ -22,10 +22,9 @@ except:
 usr = "root"
 psswrd = "super!secret"
 
-client = pymongo.MongoClient("mongodb://" + usr + ":" + psswrd + "@" + ip)
+client = pymongo.MongoClient("mongodb://" + usr + ":" + psswrd + "@" + ip + ":27017/")
 db = client["freeway"] 
-db.list_collection_names()
-'''
+
 detector_file = data_dir + "/detectors.csv"
 station_file = data_dir + "/stations.csv"
 highway_file = data_dir + "/highways.csv"
@@ -54,4 +53,4 @@ with open(detector_file, 'r') as csvfile:
                                 "stationid" : line[6]
                 }
                 result = detectors.insert_one(detector_dict)
-                print(result)'''
+                print(result)

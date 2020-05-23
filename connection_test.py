@@ -11,6 +11,7 @@ ip = sys.argv[1]
 usr = "root"
 psswrd = "super!secret"
 
-client = pymongo.MongoClient(
-        "mongodb://" + usr + ":" + psswrd + "@" + ip + "/test?retryWrites=true&w=majority")
+client = pymongo.MongoClient("mongodb://" + usr + ":" + psswrd + "@" + ip + ":27017/")
 db = client.freeway 
+x = col = db.list_collection_names()
+print(x)
