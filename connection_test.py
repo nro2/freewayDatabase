@@ -14,7 +14,7 @@ psswrd = "super!secret"
 
 client = pymongo.MongoClient("mongodb://" + usr + ":" + psswrd + "@" + ip + ":27017/")
 db = client.freeway 
-print ("#---------------------------------------------#")
+print ("\n#---------------------------------------------#")
 # query 1
 cols = db.list_collection_names()
 print(cols)
@@ -24,4 +24,4 @@ query2 = {"detectorid": { "$lt": "1350" }}
 detectors = db.detectors.find(query2)
 for detector in detectors:
         pprint(detector)
-print ("#---------------------------------------------#")
+print ("#---------------------------------------------#\n")
