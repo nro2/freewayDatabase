@@ -72,8 +72,9 @@ def import_stations(db, station_file):
                 next(csv_reader)       # skips first line (column headers)
                 for line in csv_reader:
                         # find reference documents
-                        highway = dict(db.highways.find({"highwayid": check_int(line[1])})[0])
-                        hw_ref = highway['_id']
+                        #highway = dict(db.highways.find({"highwayid": check_int(line[1])})[0])
+                        #hw_ref = highway['_id']
+                        
                         # create station dict from input line
                         station_dict = { "stationid" : check_int(line[0]),
                                         "highwayid" : check_int(line[1]),
@@ -86,7 +87,7 @@ def import_stations(db, station_file):
                                         "latlon" : str(line[8]),
                                         "length" : float(line[9]),
                                         # reference _ids 
-                                        "highwayref": str(hw_ref),
+                                        #"highwayref": str(hw_ref),
                         }
                         #insert station 
                         result = stations.insert_one(station_dict) 
@@ -106,10 +107,11 @@ def import_detectors(db, detector_file):
                 next(csv_reader)       # skips first line (column headers)
                 for line in csv_reader:
                         # find reference documents
-                        highway = dict(db.highways.find({"highwayid": check_int(line[1])})[0])
-                        hw_ref = highway['_id']
-                        station = dict(db.stations.find({"stationid": check_int(line[6])})[0])
-                        st_ref = station['_id']
+                        #highway = dict(db.highways.find({"highwayid": check_int(line[1])})[0])
+                        #hw_ref = highway['_id']
+                        #station = dict(db.stations.find({"stationid": check_int(line[6])})[0])
+                        #st_ref = station['_id']
+                        
                         # create detector dict (schema) from input line
                         detector_dict = { "detectorid" : check_int(line[0]),
                                         "highwayid" : check_int(line[1]),
@@ -119,8 +121,8 @@ def import_detectors(db, detector_file):
                                         "lanenumber" : check_int(line[5]),
                                         "stationid" : check_int(line[6]),
                                         # reference _ids 
-                                        "stationref": str(st_ref),
-                                        "highwayref": str(hw_ref)
+                                        #"stationref": str(st_ref),
+                                        #"highwayref": str(hw_ref)
                                         # this might be the more correct way of referencing, 
                                         # if we figure out how to query this format (ObjectId function not in pymongo)
                                         #"highwayref": { "$ref": "highway", "$_id": ObjectId(str(hw_ref)) } 
@@ -147,12 +149,17 @@ def import_loopdata(db, loopdata_file):
                         # find reference documents
                         detector = dict(db.detectors.find({"detectorid": check_int(line[0])})[0])
                         dt_ref = detector['_id']
-                        hw_ref = detector['highwayref']
-                        st_ref = detector['stationref']
+                        hw_id = detector['highwayid']
+                        st_id = detector['stationid']
+                        
+                        # convert starttime to milliseconds since epoch (BSON format for Mongo)
+                        #startdate = str(line[1]) + '00'  # format timezone correctly for datetime conversion below
+                        #milliseconds_since_epoch = datetime.datetime.strptime((startdate), '%Y-%m-%d %H:%M:%S%z').strftime('%s') * 1000
+                        
                         # create reading dict (schema) from input line
                         reading_dict = { "detectorid" : check_int(line[0]),
                                         # probably need to figure our datetime formatting in Mongo
-                                        "starttime" : str(line[1]),
+                                        "starttime" : str(line[1]), # milliseconds_since_epoch, 
                                         "volume": check_int(line[2]), 
                                         "speed" : check_int(line[3]),
                                         "occupancy" : check_int(line[4]),
@@ -160,8 +167,8 @@ def import_loopdata(db, loopdata_file):
                                         "dqflags" : check_int(line[6]),
                                         # reference _ids 
                                         "detectorref" : str(dt_ref),
-                                        "stationref": str(st_ref),
-                                        "highwayref": str(hw_ref)
+                                        "stationid": str(st_id),
+                                        "highwayid": str(hw_id)
                         }
                         result = loopdata.insert_one(reading_dict)
                         i += 1
