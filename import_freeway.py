@@ -152,21 +152,27 @@ def import_loopdata(db, loopdata_file):
                         hw_id = detector['highwayid']
                         st_id = detector['stationid']
                         
+                        # split date and time into two attributes
+                        parsed = str(line[1]).split(' ')
+                        date = parsed[0].strip()
+                        time = parsed[1].strip()
                         # convert starttime to milliseconds since epoch (BSON format for Mongo)
                         #startdate = str(line[1]) + '00'  # format timezone correctly for datetime conversion below
                         #milliseconds_since_epoch = datetime.datetime.strptime((startdate), '%Y-%m-%d %H:%M:%S%z').strftime('%s') * 1000
-                        
+        
                         # create reading dict (schema) from input line
                         reading_dict = { "detectorid" : check_int(line[0]),
                                         # probably need to figure our datetime formatting in Mongo
                                         "starttime" : str(line[1]), # milliseconds_since_epoch, 
+                                        "date": date,
+                                        "time": time,
                                         "volume": check_int(line[2]), 
                                         "speed" : check_int(line[3]),
                                         "occupancy" : check_int(line[4]),
                                         "status" : check_int(line[5]),
                                         "dqflags" : check_int(line[6]),
                                         # reference _ids 
-                                        "detectorref" : str(dt_ref),
+                                        #"detectorref" : str(dt_ref),
                                         "stationid": str(st_id),
                                         "highwayid": str(hw_id)
                         }
