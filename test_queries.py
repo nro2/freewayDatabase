@@ -98,6 +98,16 @@ for reading in readings:
         time = (float(length) / avgSpeed) * 3600
         intvlList.append(tuple((intvlTime, time)))
 
+#make sure we capture the last reading
+if not lastIntvl:
+    avgSpeed = totSpeeds / counter
+    time = (float(length) / avgSpeed) * 3600
+    intvlList.append(tuple((intvlTime, time)))
+
+print("\n Interval       Time")
+for i in range(len(intvlList)):
+    print(intvlList[i])
+
 
 print ("#---------------------------------------------#")
 # QUERY 4 - Peak Period Travel Times: Find the average travel time for 7-9AM and 4-6PM on September 22, 2011 for station Foster NB. 
