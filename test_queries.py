@@ -65,7 +65,7 @@ station = db.stations.find_one(query2)
 length = station['length']
 
 #query all loopdata for station id and for sept 21, 2011
-readings = db.loopdata.find({"stationid": '1045', "date": '2011-09-15'})  #***replace '1045' with 'station' and '2011-09-22'***
+readings = db.loopdata.find({"stationid": '1045', "date": '2011-09-15'}).sort("time")  #***replace '1045' with 'station' and '2011-09-22'***
 for reading in readings:
     newIntvl = False
     lastIntvl = False
@@ -94,14 +94,18 @@ for reading in readings:
 #        print("TotSpeeds:", totSpeeds, "Counter:", counter)  #debug
 
     if lastIntvl:
-        avgSpeed = totSpeeds / counter
-        time = (float(length) / avgSpeed) * 3600
+        if(counter > 0):
+            avgSpeed = totSpeeds / counter
+        if(avgSpeed > 0):
+            time = (float(length) / avgSpeed) * 3600
         intvlList.append(tuple((intvlTime, time)))
 
 #make sure we capture the last reading
 if not lastIntvl:
-    avgSpeed = totSpeeds / counter
-    time = (float(length) / avgSpeed) * 3600
+    if(counter > 0):
+        avgSpeed = totSpeeds / counter
+    if(avgSpeed > 0):
+        time = (float(length) / avgSpeed) * 3600
     intvlList.append(tuple((intvlTime, time)))
 
 print("\n Interval       Time")
