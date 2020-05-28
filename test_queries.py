@@ -94,6 +94,7 @@ for reading in readings:
 #        print("TotSpeeds:", totSpeeds, "Counter:", counter)  #debug
 
     if lastIntvl:
+        time = 0
         if(counter > 0):
             avgSpeed = totSpeeds / counter
         if(avgSpeed > 0):
@@ -102,6 +103,7 @@ for reading in readings:
 
 #make sure we capture the last reading
 if not lastIntvl:
+    time = 0
     if(counter > 0):
         avgSpeed = totSpeeds / counter
     if(avgSpeed > 0):
