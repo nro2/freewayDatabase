@@ -13,7 +13,7 @@ usr = "root"
 psswrd = "super!secret"
 
 client = pymongo.MongoClient("mongodb://" + usr + ":" + psswrd + "@" + ip + ":27017/")
-db = client.freeway 
+db = client.freemongo 
 print ("\n###############################################")
 #print ("#---------------------------------------------#\n")
 # print all loopdata - for testing/verification
