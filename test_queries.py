@@ -13,7 +13,7 @@ usr = "root"
 psswrd = "super!secret"
 
 client = pymongo.MongoClient("mongodb://" + usr + ":" + psswrd + "@" + ip + ":27017/")
-db = client.freemongo 
+db = client.freeway 
 print ("\n###############################################")
 #print ("#---------------------------------------------#\n")
 # print all loopdata - for testing/verification
@@ -53,7 +53,7 @@ station =  detectors['stationid']
 #rint(station)
 date = '2011-10-20'
 # query all loopdata for station id and for sept 21, 2011 - return volume 
-readings = db.loopdata.find({"stationid": str(station), "date": date},{"volume" : 1})
+readings = db.loopdata.find({"stationid": station, "date": date},{"volume" : 1})
 total = 0
 for reading in readings:
     if reading['volume'] != '':
@@ -84,7 +84,7 @@ length = station['length']
 date = "2011-10-20"
 
 #query all loopdata for station id and for sept 21, 2011
-readings = db.loopdata.find({"stationid": str(stationNum), "date": date}).sort("time")  #***replace '1045' with 'station' and '2011-09-22'***
+readings = db.loopdata.find({"stationid": stationNum, "date": date}).sort("time")  #***replace '1045' with 'station' and '2011-09-22'***
 for reading in readings:
     newIntvl = False
     lastIntvl = False
@@ -116,16 +116,17 @@ for reading in readings:
     if lastIntvl:
         avgSpeed = totSpeeds / counter
         time = (float(length) / avgSpeed) * 3600
-        intvlList.append(tuple((intvlTime, time)))
+        intvlList.append(tuple((intvlTime, round(time, 4))))
 
 #make sure we capture the last reading
 if not lastIntvl:
     if counter > 0 and avgSpeed > 0:
         avgSpeed = totSpeeds / counter
         time = (float(length) / avgSpeed) * 3600
-        intvlList.append(tuple((intvlTime, time)))
+        intvlList.append(tuple((intvlTime, round(time, 4))))
 
-print("\n Interval Time")
+print("\n", date, "  ", stationNum)
+print("Time Interval,  Travel Time")
 for intvl in intvlList:
     print(intvl)
 
