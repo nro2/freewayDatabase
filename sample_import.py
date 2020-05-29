@@ -142,8 +142,8 @@ def import_loopdata(db, loopdata_file):
         char = ord('a') - 1
         for i in range(0,16):
                 char += 1
-                suffix = chr(char) + ".csv"
-                print(suffix)
+                suffix = chr(char) #+ ".csv"
+                #print(suffix)
         
                 with open(loopdata_file + suffix , 'r') as csvfile:
                         csv_reader = csv.reader(csvfile, delimiter=',', quotechar='"')
@@ -153,10 +153,15 @@ def import_loopdata(db, loopdata_file):
                         i = 0
                         for line in csv_reader:
                                 # find reference documents
-                                detector = dict(db.detectors.find({"detectorid": check_int(line[0])})[0])
-                                dt_ref = detector['_id']
-                                hw_id = detector['highwayid']
-                                st_id = detector['stationid']
+                                detectors = db.detectors.find({"detectorid": check_int(line[0])})
+                                if detectors:
+                                    detector = dict(detectors[0])
+                                    dt_ref = detector['_id']
+                                    hw_id = detector['highwayid']
+                                    st_id = detector['stationid']
+                                else:
+                                    hw_id = ''
+                                    st_id = ''
                                 
                                 # split date and time into two attributes
                                 parsed = str(line[1]).split(' ')
@@ -186,9 +191,9 @@ def import_loopdata(db, loopdata_file):
                                 # limit number of imports for testing
                                 i += 1
                                 if i % 200 == 0:
-                                        for x in range(3000):
+                                        for x in range(2000):
                                                 next(csv_reader)
-                                if i > 3000:
+                                if i > 2000:
                                         break
                         print(suffix)
         # test if insertions were successful by printing collection
@@ -219,7 +224,7 @@ def main():
         station_file = data_dir + "/stations.csv"
         highway_file = data_dir + "/highways.csv"
         #loopdata_file = data_dir + "/freeway100k_sample.csv"
-        loopdata_file = data_dir + "../../freeway_split/fwld_a"
+        loopdata_file = "/home/sseeman/split_1m/a"
         # import data into MongoDB collections from csv files
         import_highways(db, highway_file)
         import_stations(db, station_file)
