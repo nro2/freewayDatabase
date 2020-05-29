@@ -138,64 +138,66 @@ def import_loopdata(db, loopdata_file):
         # delete and recreate collection (OVERWRITE)
         db.loopdata.drop()
         loopdata = db["loopdata"]
-        char = ord('a') - 1
-        for i in range(0,15):
-                char += 1
-                suffix = chr(char) + ".csv"
+        # code for test import
+        #char = ord('a') - 1
+        #for i in range(0,15):
+                #char += 1
+                #suffix = chr(char) + ".csv"
                 #print(suffix)
      
-                with open(loopdata_file + suffix, 'r') as csvfile:
-                        csv_reader = csv.reader(csvfile, delimiter=',', quotechar='"')
-                        next(csv_reader)       # skips first line (column headers)
-                        
-                        # use i counter to limit number of imports for testing
-                        i = 0
-                        for line in csv_reader:
-                                # find reference documents
-                                detector = dict(db.detectors.find({"detectorid": check_int(line[0])})[0])
-                                dt_ref = detector['_id']
-                                hw_id = detector['highwayid']
-                       
-                                st_id = detector['stationid']
-                                
-                                
-                                # split date and time into two attributes
-                                parsed = str(line[1]).split(' ')
-                                date = parsed[0].strip()
-                                time = parsed[1].strip()
-                                # convert starttime to milliseconds since epoch (BSON format for Mongo)
-                                #startdate = str(line[1]) + '00'  # format timezone correctly for datetime conversion below
-                                #milliseconds_since_epoch = datetime.datetime.strptime((startdate), '%Y-%m-%d %H:%M:%S%z').strftime('%s') * 1000
+        with open(loopdata_file, 'r') as csvfile:
+                csv_reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+                next(csv_reader)       # skips first line (column headers)
                 
-                                # create reading dict (schema) from input line
-                                reading_dict = { "detectorid" : check_int(line[0]),
-                                                # probably need to figure our datetime formatting in Mongo
-                                                "starttime" : str(line[1]), # milliseconds_since_epoch, 
-                                                "date": date,
-                                                "time": time,
-                                                "volume": check_int(line[2]), 
-                                                "speed" : check_int(line[3]),
-                                                "occupancy" : check_int(line[4]),
-                                                "status" : check_int(line[5]),
-                                                "dqflags" : check_int(line[6]),
-                                                # reference _ids 
-                                                #"detectorref" : str(dt_ref),
-                                                "stationid": int(st_id),
-                                                "highwayid": int(hw_id)
-                                }
-                                result = loopdata.insert_one(reading_dict)
-                                i += 1
-                                # limit number of imports for testing
-                                if i % 100 == 0:
-                                        for x in range(3000):
-                                                next(csv_reader)
-                                if i > 100:
-                                        break
-                        print(suffix)
+                # use i counter to limit number of imports for testing
+                i = 0
+                for line in csv_reader:
+                        # find reference documents
+                        detector = dict(db.detectors.find({"detectorid": check_int(line[0])})[0])
+                        dt_ref = detector['_id']
+                        hw_id = detector['highwayid']
+                        st_id = detector['stationid']
+                        
+                        # split date and time into two attributes
+                        parsed = str(line[1]).split(' ')
+                        date = parsed[0].strip()
+                        time = parsed[1].strip()
+                        # convert starttime to milliseconds since epoch (BSON format for Mongo)
+                        #startdate = str(line[1]) + '00'  # format timezone correctly for datetime conversion below
+                        #milliseconds_since_epoch = datetime.datetime.strptime((startdate), '%Y-%m-%d %H:%M:%S%z').strftime('%s') * 1000
+        
+                        # create reading dict (schema) from input line
+                        reading_dict = { "detectorid" : check_int(line[0]),
+                                        # probably need to figure our datetime formatting in Mongo
+                                        "starttime" : str(line[1]), # milliseconds_since_epoch, 
+                                        "date": date,
+                                        "time": time,
+                                        "volume": check_int(line[2]), 
+                                        "speed" : check_int(line[3]),
+                                        "occupancy" : check_int(line[4]),
+                                        "status" : check_int(line[5]),
+                                        "dqflags" : check_int(line[6]),
+                                        # reference _ids 
+                                        #"detectorref" : str(dt_ref),
+                                        "stationid": int(st_id),
+                                        "highwayid": int(hw_id)
+                        }
+                        result = loopdata.insert_one(reading_dict)
+                        # limit number of imports for testing
+                        i += 1
+                        if i % 10000 == 0:
+                                print(i)
+                        #if i % 100 == 0:
+                                #for x in range(3000):
+                                        #next(csv_reader)
+                        #if i > 100:
+                                #break
+                #print(suffix)
         # test if insertions were successful by printing collection
-        loopdata = db.loopdata.find()
-        for reading in loopdata:
-                print(reading)
+        #loopdata = db.loopdata.find()
+        #for reading in loopdata:
+                #print(reading)
+                
 #-------------------------------------------------------#
 # utility function to check if input_string is 
 # null before converting to integer
@@ -204,7 +206,6 @@ def check_int(input_string):
                 return str('')
         else:
                 return int(input_string)
-
 
 #########################################################
 #---------------------MAIN------------------------------#
@@ -220,7 +221,7 @@ def main():
         station_file = data_dir + "/stations.csv"
         highway_file = data_dir + "/highways.csv"
         #loopdata_file = data_dir + "/freeway100k_sample.csv"
-        loopdata_file = data_dir + "../../freeway_split/fwld_a"
+        loopdata_file = data_dir + "../../freeway_data/freeway_loopdata.csv"
         # import data into MongoDB collections from csv files
         import_highways(db, highway_file)
         import_stations(db, station_file)
