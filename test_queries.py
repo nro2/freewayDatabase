@@ -35,7 +35,7 @@ query = {"locationtext": "Foster NB"}
 detectors = db.detectors.find_one(query)
 station = detectors['stationid']
 # query all loopdata for station id and for sept 21, 2011 - return volume 
-readings = db.loopdata.find({"stationid": '1045', "date": '2011-09-15'},{"volume" : 1})
+readings = db.loopdata.find({"stationid": station, "date": '2011-09-15'},{"volume" : 1})
 total = 0
 for reading in readings:
     if reading['volume'] != '':
@@ -72,6 +72,7 @@ for reading in readings:
     timestamp = reading['time']
     minutes = timestamp[3:5]
     seconds = timestamp[6:8]
+    print(reading)
 
     if(int(minutes) % 5 == 0) and seconds == '00':
         newIntvl = True
@@ -94,23 +95,19 @@ for reading in readings:
 #        print("TotSpeeds:", totSpeeds, "Counter:", counter)  #debug
 
     if lastIntvl:
-        time = 0
-        if(counter > 0):
+        if counter > 0 and avgSpeed > 0:
             avgSpeed = totSpeeds / counter
-        if(avgSpeed > 0):
             time = (float(length) / avgSpeed) * 3600
-        intvlList.append(tuple((intvlTime, time)))
+            intvlList.append(tuple((intvlTime, time)))
 
 #make sure we capture the last reading
 if not lastIntvl:
-    time = 0
-    if(counter > 0):
+    if counter > 0 and avgSpeed > 0:
         avgSpeed = totSpeeds / counter
-    if(avgSpeed > 0):
         time = (float(length) / avgSpeed) * 3600
-    intvlList.append(tuple((intvlTime, time)))
+        intvlList.append(tuple((intvlTime, time)))
 
-print("\n Interval       Time")
+print("\n Interval Time")
 for i in range(len(intvlList)):
     print(intvlList[i])
 

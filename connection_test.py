@@ -21,7 +21,7 @@ print(cols)
 print ("#---------------------------------------------#")
 # query 2 - all detector ids less than 1350
 query2 = {"detectorid": { "$lt": 1350 }}
-detectors = db.detectors.find(query2)
+detectors = db.detectors.find() #query2)
 for detector in detectors:
         pprint(detector)
 print ("#---------------------------------------------#\n")
