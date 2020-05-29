@@ -144,38 +144,56 @@ station = {"stationid": stationID}
 stations = db.stations.find_one(station)
 stationLength = stations['length']
 
-count = 0
-speeds = []
-average = 0
+count1 = 0
+count2 = 0
+speeds1 = []
+speeds2 = []
+average1 = 0
+average2 = 0
 
-readings = db.loopdata.find({
-    "$or":
-    [
-        {"stationid": stationID,
-        "date": '2011-10-28',
-        "time": {
-            "$gte": '18:00:40-07',
-            "$lte": '18:03:20-07'
-        }},
-        {"stationid": stationID,
-        "date": '2011-10-28',
-        "time": {
-            "$gte": '17:42:30-07',
-            "$lte": '17:43:20-07'
-        }}
-    ]
+window1Lower = '18:00:40-07'
+window1Upper = '18:03:20-07'
+
+window2Lower = '17:42:30-07'
+window2Upper = '17:43:20-07'
+
+readings1 = db.loopdata.find({
+    "stationid": stationID,
+    "date": '2011-10-28',
+    "time": {
+        "$gte": window1Lower,
+        "$lte": window1Upper
+    }
 })
 
-for reading in readings:
+readings2 = db.loopdata.find({
+    "stationid": stationID,
+    "date": '2011-10-28',
+    "time": {
+        "$gte": window2Lower,
+        "$lte": window2Upper
+    }
+})
+
+for reading in readings1:
     if reading['speed'] is not '':
-        speeds.append(reading['speed'])
-        count += 1
+        speeds1.append(reading['speed'])
+        count1 += 1
 
+for reading in readings2:
+    if reading['speed'] is not '':
+        speeds2.append(reading['speed'])
+        count2 += 1
 
-average = (stationLength/(sum(speeds)/count)) * 3600
-print(speeds)
-print(count)
-print(average, "Is the average travel time for Foster NB")
+print(stationLength)
+average1 = (stationLength/(sum(speeds1)/count1)) * 3600
+average2 = (stationLength/(sum(speeds2)/count2)) * 3600
+print(speeds1)
+print(speeds2)
+print(count1)
+print(count2)
+print(average1, "Is the average travel time for Foster NB from ", window1Lower, "to", window1Upper)
+print(average2, "Is the average travel time for Foster NB from ", window2Lower, "to", window2Upper)
 
 
 print ("#---------------------------------------------#")
