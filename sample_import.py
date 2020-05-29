@@ -152,16 +152,21 @@ def import_loopdata(db, loopdata_file):
                         # use i counter to limit number of imports for testing
                         i = 0
                         for line in csv_reader:
+                                # limit number of imports for testing
+                                i += 1
+                                if i % 100 == 0:
+                                        for x in range(2000):
+                                                next(csv_reader)
+                                if i > 2000:
+                                        break
                                 # find reference documents
-                                detectors = db.detectors.find({"detectorid": check_int(line[0])})
-                                if detectors:
-                                    detector = dict(detectors[0])
-                                    dt_ref = detector['_id']
-                                    hw_id = detector['highwayid']
-                                    st_id = detector['stationid']
-                                else:
-                                    hw_id = ''
-                                    st_id = ''
+                                results = db.detectors.count_documents({"detectorid": check_int(line[0])})
+                                if results == 0:
+                                    continue
+                                detector = dict(db.detectors.find({"detectorid": check_int(line[0])})[0])
+                                dt_ref = detector['_id']
+                                hw_id = detector['highwayid']
+                                st_id = detector['stationid']
                                 
                                 # split date and time into two attributes
                                 parsed = str(line[1]).split(' ')
@@ -188,13 +193,6 @@ def import_loopdata(db, loopdata_file):
                                                 "highwayid": int(hw_id)
                                 }
                                 result = loopdata.insert_one(reading_dict)
-                                # limit number of imports for testing
-                                i += 1
-                                if i % 200 == 0:
-                                        for x in range(2000):
-                                                next(csv_reader)
-                                if i > 2000:
-                                        break
                         print(suffix)
         # test if insertions were successful by printing collection
         #loopdata = db.loopdata.find()

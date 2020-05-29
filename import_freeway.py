@@ -153,6 +153,9 @@ def import_loopdata(db, loopdata_file):
                 i = 0
                 for line in csv_reader:
                         # find reference documents
+                        results = db.detectors.count_documents({"detectorid": check_int(line[0])})
+                        if results == 0:
+                            continue
                         detector = dict(db.detectors.find({"detectorid": check_int(line[0])})[0])
                         dt_ref = detector['_id']
                         hw_id = detector['highwayid']
