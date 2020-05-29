@@ -40,7 +40,7 @@ print("Found Highways: " + str(len(count)) + " " + str(count) + '\n')
 print ("#---------------------------------------------#")
 # QUERY 1 - Count high speeds: Find the number of speeds > 100 in the data set.
 print("Query 1")
-reading_count = db.loopdata.find({"speed": {"$gt": 100}}).count()
+reading_count = db.loopdata.count_documents({"speed": {"$gt": 100}})
 print("Count of 100+ speeds: " + str(reading_count))
 
 print ("#---------------------------------------------#")
@@ -136,6 +136,48 @@ print ("#---------------------------------------------#")
 # Report travel time in seconds.
 print("Query 4")
 
+location = {"locationtext": "Foster NB"}
+detectors = db.detectors.find_one(location)
+stationID = detectors['stationid']
+
+station = {"stationid": stationID}  
+stations = db.stations.find_one(station)
+stationLength = stations['length']
+
+count = 0
+speeds = []
+average = 0
+
+readings = db.loopdata.find({
+    "$or":
+    [
+        {"stationid": stationID,
+        "date": '2011-10-28',
+        "time": {
+            "$gte": '18:00:40-07',
+            "$lte": '18:03:20-07'
+        }},
+        {"stationid": stationID,
+        "date": '2011-10-28',
+        "time": {
+            "$gte": '17:42:30-07',
+            "$lte": '17:43:20-07'
+        }}
+    ]
+})
+
+for reading in readings:
+    if reading['speed'] is not '':
+        speeds.append(reading['speed'])
+        count += 1
+
+
+average = (stationLength/(sum(speeds)/count)) * 3600
+print(speeds)
+print(count)
+print(average, "Is the average travel time for Foster NB")
+
+
 print ("#---------------------------------------------#")
 # QUERY 5 - Peak Period Travel Times: Find the average travel time for 7-9AM and 4-6PM on September 22, 2011 for the I-205 NB freeway. 
 # Report travel time in minutes.
@@ -148,3 +190,5 @@ print("Query 6")
 
 print ("#---------------------------------------------#")
 print ("###############################################\n")
+
+
