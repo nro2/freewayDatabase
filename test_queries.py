@@ -144,8 +144,6 @@ station = {"stationid": stationID}
 stations = db.stations.find_one(station)
 stationLength = stations['length']
 
-<<<<<<< HEAD
-
 window1Lower = '18:00:40-07'
 window1Upper = '18:03:20-07'
 
@@ -177,40 +175,6 @@ average2 = calculateAverage(window2Lower, window2Upper, stationLength)
 
 print(average1, "Is the average travel time for Foster NB from ", window1Lower, "to", window1Upper)
 print(average2, "Is the average travel time for Foster NB from ", window2Lower, "to", window2Upper)
-=======
-count = 0
-speeds = []
-average = 0
-
-readings = db.loopdata.find({
-    "$or":
-    [
-        {"stationid": stationID,
-        "date": '2011-10-28',
-        "time": {
-            "$gte": '18:00:40-07',
-            "$lte": '18:03:20-07'
-        }},
-        {"stationid": stationID,
-        "date": '2011-10-28',
-        "time": {
-            "$gte": '17:42:30-07',
-            "$lte": '17:43:20-07'
-        }}
-    ]
-})
-
-for reading in readings:
-    if reading['speed'] is not '':
-        speeds.append(reading['speed'])
-        count += 1
-
-
-average = (stationLength/(sum(speeds)/count)) * 3600
-print(speeds)
-print(count)
-print(average, "Is the average travel time for Foster NB")
->>>>>>> Write query 4.
 
 
 print ("#---------------------------------------------#")
