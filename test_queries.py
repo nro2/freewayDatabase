@@ -17,17 +17,31 @@ db = client.freeway
 print ("\n###############################################")
 #print ("#---------------------------------------------#\n")
 # print all loopdata - for testing/verification
-#readings = db.detectors.find()
+#query = {"stationid":'1047'}
+#readings = db.loopdata.find(query)
 #for reading in readings:
-    #print(reading)
+#    print(reading)
+    
 count = db.loopdata.count()
-print("Total Readings: " + str(count) + '\n')
+print("Total Readings: " + str(count))
+count = db.detectors.count()
+print("Total Detectors: " + str(count))
+count = db.loopdata.distinct("detectorid")
+print("Found Detectors: " + str(len(count)) + " " + str(count))
+count = db.stations.count()
+print("Total Stations: " + str(count))
+count = db.loopdata.distinct("stationid")
+print("Found Stations: " + str(len(count)) + " " + str(count))
+count = db.highways.count()
+print("Total Highways: " + str(count))
+count = db.loopdata.distinct("highwayid")
+print("Found Highways: " + str(len(count)) + " " + str(count) + '\n')
     
 print ("#---------------------------------------------#")
 # QUERY 1 - Count high speeds: Find the number of speeds > 100 in the data set.
 print("Query 1")
-reading_count = db.loopdata.find({"speed": {"$gt": 80}}).count()
-print("Count of 80+ speeds: " + str(reading_count))
+reading_count = db.loopdata.find({"speed": {"$gt": 100}}).count()
+print("Count of 100+ speeds: " + str(reading_count))
 
 print ("#---------------------------------------------#")
 # QUERY 2 - Volume: Find the total volume for the station Foster NB for Sept 21, 2011.
@@ -35,11 +49,11 @@ print("Query 2")
 # find station id for Foster NB
 query = {"locationtext": "Foster NB"}
 detectors = db.detectors.find_one(query)
-station =  '1140' #detectors['stationid']
-#print(station)
-date = '2011-11-11'
+station =  detectors['stationid']
+#rint(station)
+date = '2011-10-20'
 # query all loopdata for station id and for sept 21, 2011 - return volume 
-readings = db.loopdata.find({"stationid": station, "date": date},{"volume" : 1})
+readings = db.loopdata.find({"stationid": str(station), "date": date},{"volume" : 1})
 total = 0
 for reading in readings:
     if reading['volume'] != '':
@@ -62,15 +76,15 @@ lastIntvl = False
 #find stationid for "Foster NB"
 query = {"locationtext": "Foster NB"}
 detectors = db.detectors.find_one(query)
-stationNum = '1045' # detectors['stationid'] #***replace "1045" with 'stationNum'***
+stationNum = detectors['stationid'] #***replace "1045" with 'stationNum'***
 
 query2 = {"stationid": stationNum}  
 station = db.stations.find_one(query2)
 length = station['length']
-date = "2011-09-15"
+date = "2011-10-20"
 
 #query all loopdata for station id and for sept 21, 2011
-readings = db.loopdata.find({"stationid": stationNum, "date": date}).sort("time")  #***replace '1045' with 'station' and '2011-09-22'***
+readings = db.loopdata.find({"stationid": str(stationNum), "date": date}).sort("time")  #***replace '1045' with 'station' and '2011-09-22'***
 for reading in readings:
     newIntvl = False
     lastIntvl = False

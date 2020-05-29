@@ -34,7 +34,7 @@ def db_connect(ip):
         # connect to remote MongoDB server
         client = pymongo.MongoClient("mongodb://" + user + ":" + password + "@" + ip + ":27017/")
         # connect to database "freeway"
-        db = client["freeway"]
+        db = client["freemongo"]
         return db
 
 #-------------------------------------------------------#
@@ -63,7 +63,7 @@ def import_highways(db, highway_file):
 #-------------------------------------------------------#
 def import_stations(db, station_file):
         # delete and recreate collection (OVERWRITE)
-        db.staions.drop()
+        db.stations.drop()
         stations = db["stations"]
         
         # read csv and write to MongoDB
@@ -155,7 +155,9 @@ def import_loopdata(db, loopdata_file):
                                 detector = dict(db.detectors.find({"detectorid": check_int(line[0])})[0])
                                 dt_ref = detector['_id']
                                 hw_id = detector['highwayid']
+                       
                                 st_id = detector['stationid']
+                                
                                 
                                 # split date and time into two attributes
                                 parsed = str(line[1]).split(' ')
@@ -178,19 +180,22 @@ def import_loopdata(db, loopdata_file):
                                                 "dqflags" : check_int(line[6]),
                                                 # reference _ids 
                                                 #"detectorref" : str(dt_ref),
-                                                "stationid": str(st_id),
-                                                "highwayid": str(hw_id)
+                                                "stationid": int(st_id),
+                                                "highwayid": int(hw_id)
                                 }
                                 result = loopdata.insert_one(reading_dict)
                                 i += 1
                                 # limit number of imports for testing
-                                if i > 120:
+                                if i % 100 == 0:
+                                        for x in range(3000):
+                                                next(csv_reader)
+                                if i > 100:
                                         break
                         print(suffix)
         # test if insertions were successful by printing collection
         loopdata = db.loopdata.find()
         for reading in loopdata:
-                pprint(reading)
+                print(reading)
 #-------------------------------------------------------#
 # utility function to check if input_string is 
 # null before converting to integer
