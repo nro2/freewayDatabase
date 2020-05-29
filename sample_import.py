@@ -34,7 +34,7 @@ def db_connect(ip):
         # connect to remote MongoDB server
         client = pymongo.MongoClient("mongodb://" + user + ":" + password + "@" + ip + ":27017/")
         # connect to database "freeway"
-        db = client["freeway"]
+        db = client["freemongo"]
         return db
 
 #-------------------------------------------------------#
@@ -142,7 +142,7 @@ def import_loopdata(db, loopdata_file):
         char = ord('a') - 1
         for i in range(0,16):
                 char += 1
-                suffix = chr(char) #+ ".csv"
+                suffix = chr(char) + ".csv"
                 #print(suffix)
         
                 with open(loopdata_file + suffix , 'r') as csvfile:
@@ -153,15 +153,14 @@ def import_loopdata(db, loopdata_file):
                         i = 0
                         for line in csv_reader:
                                 # find reference documents
-                                detectors = db.detectors.find({"detectorid": check_int(line[0])})
-                                if detectors:
-                                    detector = dict(detectors[0])
-                                    dt_ref = detector['_id']
-                                    hw_id = detector['highwayid']
-                                    st_id = detector['stationid']
-                                else:
-                                    hw_id = ''
-                                    st_id = ''
+                                results = db.detectors.count_documents({"detectorid": check_int(line[0])})
+                                #print(results)
+                                if results == 0:
+                                        continue
+                                detector = dict(db.detectors.find({"detectorid": check_int(line[0])})[0])
+                                dt_ref = detector['_id']
+                                hw_id = detector['highwayid']
+                                st_id = detector['stationid']
                                 
                                 # split date and time into two attributes
                                 parsed = str(line[1]).split(' ')
@@ -190,10 +189,10 @@ def import_loopdata(db, loopdata_file):
                                 result = loopdata.insert_one(reading_dict)
                                 # limit number of imports for testing
                                 i += 1
-                                if i % 200 == 0:
-                                        for x in range(2000):
+                                if i % 10 == 0:
+                                        for x in range(2500):
                                                 next(csv_reader)
-                                if i > 2000:
+                                if i > 1000:
                                         break
                         print(suffix)
         # test if insertions were successful by printing collection
@@ -224,7 +223,8 @@ def main():
         station_file = data_dir + "/stations.csv"
         highway_file = data_dir + "/highways.csv"
         #loopdata_file = data_dir + "/freeway100k_sample.csv"
-        loopdata_file = "/home/sseeman/split_1m/a"
+        loopdata_file = data_dir + "../../freeway_split/fwld_a"
+        loopdata_file = data_dir + "../../freeway_split/fwld_a"
         # import data into MongoDB collections from csv files
         import_highways(db, highway_file)
         import_stations(db, station_file)
