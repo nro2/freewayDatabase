@@ -24,7 +24,7 @@ print ("\n###############################################")
 print ("#---------------------------------------------#")
 # QUERY 1 - Count high speeds: Find the number of speeds > 100 in the data set.
 print("Query 1")
-reading_count = db.loopdata.find({"speed": {"$gt": 100}}).count()
+reading_count = db.loopdata.count_documents({"speed": {"$gt": 100}})
 print("Count of 100+ speeds: " + str(reading_count))
 
 print ("#---------------------------------------------#")
@@ -46,79 +46,121 @@ print("Volume: " + str(total))
 print ("#---------------------------------------------#")
 # QUERY 3 - Single-Day Station Travel Times: Find travel time for station Foster NB for 5-minute intervals for Sept 22, 2011. 
 # Report travel time in seconds.
-print("Query 3")
+# print("Query 3")
 
-intvlList = []
-counter = 0
-totSpeeds = 0
-avgSpeed = 0
-intvlTime = 0
-lastIntvl = False
+# intvlList = []
+# counter = 0
+# totSpeeds = 0
+# avgSpeed = 0
+# intvlTime = 0
+# lastIntvl = False
 
-#find stationid for "Foster NB"
-query = {"locationtext": "Foster NB"}
-detectors = db.detectors.find_one(query)
-stationNum = detectors['stationid']
+# #find stationid for "Foster NB"
+# query = {"locationtext": "Foster NB"}
+# detectors = db.detectors.find_one(query)
+# stationNum = detectors['stationid']
 
-query2 = {"stationid": "1045"}  #***replace "1045" with 'stationNum'***
-station = db.stations.find_one(query2)
-length = station['length']
+# query2 = {"stationid": "1045"}  #***replace "1045" with 'stationNum'***
+# station = db.stations.find_one(query2)
+# length = station['length']
 
-#query all loopdata for station id and for sept 21, 2011
-readings = db.loopdata.find({"stationid": '1045', "date": '2011-09-15'}).sort("time")  #***replace '1045' with 'station' and '2011-09-22'***
-for reading in readings:
-    newIntvl = False
-    lastIntvl = False
-    timestamp = reading['time']
-    minutes = timestamp[3:5]
-    seconds = timestamp[6:8]
+# #query all loopdata for station id and for sept 21, 2011
+# readings = db.loopdata.find({"stationid": '1045', "date": '2011-09-15'}).sort("time")  #***replace '1045' with 'station' and '2011-09-22'***
+# for reading in readings:
+#     newIntvl = False
+#     lastIntvl = False
+#     timestamp = reading['time']
+#     minutes = timestamp[3:5]
+#     seconds = timestamp[6:8]
 
-    if(int(minutes) % 5 == 0) and seconds == '00':
-        newIntvl = True
-#        print("***newIntvl***")  #debug
-    elif(int(minutes) % 5 == 4) and seconds == '40':
-        lastIntvl = True
-#        print("***lastIntvl***")  #debug
+#     if(int(minutes) % 5 == 0) and seconds == '00':
+#         newIntvl = True
+# #        print("***newIntvl***")  #debug
+#     elif(int(minutes) % 5 == 4) and seconds == '40':
+#         lastIntvl = True
+# #        print("***lastIntvl***")  #debug
 
-#    print("Minutes:", minutes)  #debug
-#    print("Seconds:", seconds)  #debug
+# #    print("Minutes:", minutes)  #debug
+# #    print("Seconds:", seconds)  #debug
    
-    if newIntvl:
-        totSpeeds = 0
-        counter = 0
-        intvlTime = timestamp
+#     if newIntvl:
+#         totSpeeds = 0
+#         counter = 0
+#         intvlTime = timestamp
 
-    if reading['speed'] != '':
-        totSpeeds += (int(reading['speed']) * int(reading['volume']))
-        counter += int(reading['volume'])
-#        print("TotSpeeds:", totSpeeds, "Counter:", counter)  #debug
+#     if reading['speed'] != '':
+#         totSpeeds += (int(reading['speed']) * int(reading['volume']))
+#         counter += int(reading['volume'])
+# #        print("TotSpeeds:", totSpeeds, "Counter:", counter)  #debug
 
-    if lastIntvl:
-        time = 0
-        if(counter > 0):
-            avgSpeed = totSpeeds / counter
-        if(avgSpeed > 0):
-            time = (float(length) / avgSpeed) * 3600
-        intvlList.append(tuple((intvlTime, time)))
+#     if lastIntvl:
+#         time = 0
+#         if(counter > 0):
+#             avgSpeed = totSpeeds / counter
+#         if(avgSpeed > 0):
+#             time = (float(length) / avgSpeed) * 3600
+#         intvlList.append(tuple((intvlTime, time)))
 
-#make sure we capture the last reading
-if not lastIntvl:
-    time = 0
-    if(counter > 0):
-        avgSpeed = totSpeeds / counter
-    if(avgSpeed > 0):
-        time = (float(length) / avgSpeed) * 3600
-    intvlList.append(tuple((intvlTime, time)))
+# #make sure we capture the last reading
+# if not lastIntvl:
+#     time = 0
+#     if(counter > 0):
+#         avgSpeed = totSpeeds / counter
+#     if(avgSpeed > 0):
+#         time = (float(length) / avgSpeed) * 3600
+#     intvlList.append(tuple((intvlTime, time)))
 
-print("\n Interval       Time")
-for i in range(len(intvlList)):
-    print(intvlList[i])
+# print("\n Interval       Time")
+# for i in range(len(intvlList)):
+#     print(intvlList[i])
 
 
 print ("#---------------------------------------------#")
 # QUERY 4 - Peak Period Travel Times: Find the average travel time for 7-9AM and 4-6PM on September 22, 2011 for station Foster NB. 
 # Report travel time in seconds.
 print("Query 4")
+
+location = {"locationtext": "Foster NB"}
+detectors = db.detectors.find_one(location)
+stationID = detectors['stationid']
+
+station = {"stationid": stationID}  
+stations = db.stations.find_one(station)
+stationLength = stations['length']
+
+count = 0
+speeds = []
+average = 0
+
+readings = db.loopdata.find({
+    "$or":
+    [
+        {"stationid": stationID,
+        "date": '2011-10-28',
+        "time": {
+            "$gte": '18:00:40-07',
+            "$lte": '18:03:20-07'
+        }},
+        {"stationid": stationID,
+        "date": '2011-10-28',
+        "time": {
+            "$gte": '17:42:30-07',
+            "$lte": '17:43:20-07'
+        }}
+    ]
+})
+
+for reading in readings:
+    if reading['speed'] is not '':
+        speeds.append(reading['speed'])
+        count += 1
+
+
+average = (stationLength/(sum(speeds)/count)) * 3600
+print(speeds)
+print(count)
+print(average, "Is the average travel time for Foster NB")
+
 
 print ("#---------------------------------------------#")
 # QUERY 5 - Peak Period Travel Times: Find the average travel time for 7-9AM and 4-6PM on September 22, 2011 for the I-205 NB freeway. 
@@ -132,3 +174,5 @@ print("Query 6")
 
 print ("#---------------------------------------------#")
 print ("###############################################\n")
+
+
