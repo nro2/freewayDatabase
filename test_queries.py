@@ -64,7 +64,6 @@ print("Volume: " + str(total))
 print ("#---------------------------------------------#")
 # QUERY 3 - Single-Day Station Travel Times: Find travel time for station Foster NB for 5-minute intervals for Sept 22, 2011. 
 # Report travel time in seconds.
-<<<<<<< HEAD
 print("Query 3")
 
 intvlList = []
@@ -130,75 +129,6 @@ print("\n", date, "  ", stationNum)
 print("Time Interval,  Travel Time")
 for intvl in intvlList:
     print(intvl)
-=======
-# print("Query 3")
-
-# intvlList = []
-# counter = 0
-# totSpeeds = 0
-# avgSpeed = 0
-# intvlTime = 0
-# lastIntvl = False
-
-# #find stationid for "Foster NB"
-# query = {"locationtext": "Foster NB"}
-# detectors = db.detectors.find_one(query)
-# stationNum = detectors['stationid']
-
-# query2 = {"stationid": "1045"}  #***replace "1045" with 'stationNum'***
-# station = db.stations.find_one(query2)
-# length = station['length']
-
-# #query all loopdata for station id and for sept 21, 2011
-# readings = db.loopdata.find({"stationid": '1045', "date": '2011-09-15'}).sort("time")  #***replace '1045' with 'station' and '2011-09-22'***
-# for reading in readings:
-#     newIntvl = False
-#     lastIntvl = False
-#     timestamp = reading['time']
-#     minutes = timestamp[3:5]
-#     seconds = timestamp[6:8]
-
-#     if(int(minutes) % 5 == 0) and seconds == '00':
-#         newIntvl = True
-# #        print("***newIntvl***")  #debug
-#     elif(int(minutes) % 5 == 4) and seconds == '40':
-#         lastIntvl = True
-# #        print("***lastIntvl***")  #debug
-
-# #    print("Minutes:", minutes)  #debug
-# #    print("Seconds:", seconds)  #debug
-   
-#     if newIntvl:
-#         totSpeeds = 0
-#         counter = 0
-#         intvlTime = timestamp
-
-#     if reading['speed'] != '':
-#         totSpeeds += (int(reading['speed']) * int(reading['volume']))
-#         counter += int(reading['volume'])
-# #        print("TotSpeeds:", totSpeeds, "Counter:", counter)  #debug
-
-#     if lastIntvl:
-#         time = 0
-#         if(counter > 0):
-#             avgSpeed = totSpeeds / counter
-#         if(avgSpeed > 0):
-#             time = (float(length) / avgSpeed) * 3600
-#         intvlList.append(tuple((intvlTime, time)))
-
-# #make sure we capture the last reading
-# if not lastIntvl:
-#     time = 0
-#     if(counter > 0):
-#         avgSpeed = totSpeeds / counter
-#     if(avgSpeed > 0):
-#         time = (float(length) / avgSpeed) * 3600
-#     intvlList.append(tuple((intvlTime, time)))
-
-# print("\n Interval       Time")
-# for i in range(len(intvlList)):
-#     print(intvlList[i])
->>>>>>> Write query 4.
 
 
 print ("#---------------------------------------------#")
@@ -215,15 +145,6 @@ stations = db.stations.find_one(station)
 stationLength = stations['length']
 
 <<<<<<< HEAD
-<<<<<<< HEAD
-=======
-count1 = 0
-count2 = 0
-speeds1 = []
-speeds2 = []
-average1 = 0
-average2 = 0
->>>>>>> Break up averages into two different windows.
 
 window1Lower = '18:00:40-07'
 window1Upper = '18:03:20-07'
@@ -231,7 +152,6 @@ window1Upper = '18:03:20-07'
 window2Lower = '17:42:30-07'
 window2Upper = '17:43:20-07'
 
-<<<<<<< HEAD
 def calculateAverage(windowLower, windowUpper, stationLength): 
     count = 0
     speeds = []
@@ -278,53 +198,19 @@ readings = db.loopdata.find({
             "$lte": '17:43:20-07'
         }}
     ]
-=======
-readings1 = db.loopdata.find({
-    "stationid": stationID,
-    "date": '2011-10-28',
-    "time": {
-        "$gte": window1Lower,
-        "$lte": window1Upper
-    }
->>>>>>> Break up averages into two different windows.
 })
 
-readings2 = db.loopdata.find({
-    "stationid": stationID,
-    "date": '2011-10-28',
-    "time": {
-        "$gte": window2Lower,
-        "$lte": window2Upper
-    }
-})
-
-for reading in readings1:
+for reading in readings:
     if reading['speed'] is not '':
-        speeds1.append(reading['speed'])
-        count1 += 1
+        speeds.append(reading['speed'])
+        count += 1
 
-<<<<<<< HEAD
+
 average = (stationLength/(sum(speeds)/count)) * 3600
 print(speeds)
 print(count)
 print(average, "Is the average travel time for Foster NB")
 >>>>>>> Write query 4.
-=======
-for reading in readings2:
-    if reading['speed'] is not '':
-        speeds2.append(reading['speed'])
-        count2 += 1
-
-print(stationLength)
-average1 = (stationLength/(sum(speeds1)/count1)) * 3600
-average2 = (stationLength/(sum(speeds2)/count2)) * 3600
-print(speeds1)
-print(speeds2)
-print(count1)
-print(count2)
-print(average1, "Is the average travel time for Foster NB from ", window1Lower, "to", window1Upper)
-print(average2, "Is the average travel time for Foster NB from ", window2Lower, "to", window2Upper)
->>>>>>> Break up averages into two different windows.
 
 
 print ("#---------------------------------------------#")
