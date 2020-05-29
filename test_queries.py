@@ -17,15 +17,17 @@ db = client.freeway
 print ("\n###############################################")
 #print ("#---------------------------------------------#\n")
 # print all loopdata - for testing/verification
-#readings = db.loopdata.find()
+#readings = db.detectors.find()
 #for reading in readings:
     #print(reading)
+count = db.loopdata.count()
+print("Total Readings: " + str(count) + '\n')
     
 print ("#---------------------------------------------#")
 # QUERY 1 - Count high speeds: Find the number of speeds > 100 in the data set.
 print("Query 1")
-reading_count = db.loopdata.find({"speed": {"$gt": 100}}).count()
-print("Count of 100+ speeds: " + str(reading_count))
+reading_count = db.loopdata.find({"speed": {"$gt": 80}}).count()
+print("Count of 80+ speeds: " + str(reading_count))
 
 print ("#---------------------------------------------#")
 # QUERY 2 - Volume: Find the total volume for the station Foster NB for Sept 21, 2011.
@@ -33,9 +35,11 @@ print("Query 2")
 # find station id for Foster NB
 query = {"locationtext": "Foster NB"}
 detectors = db.detectors.find_one(query)
-station = detectors['stationid']
+station =  '1140' #detectors['stationid']
+#print(station)
+date = '2011-11-11'
 # query all loopdata for station id and for sept 21, 2011 - return volume 
-readings = db.loopdata.find({"stationid": station, "date": '2011-09-15'},{"volume" : 1})
+readings = db.loopdata.find({"stationid": station, "date": date},{"volume" : 1})
 total = 0
 for reading in readings:
     if reading['volume'] != '':
@@ -58,21 +62,22 @@ lastIntvl = False
 #find stationid for "Foster NB"
 query = {"locationtext": "Foster NB"}
 detectors = db.detectors.find_one(query)
-stationNum = detectors['stationid']
+stationNum = '1045' # detectors['stationid'] #***replace "1045" with 'stationNum'***
 
-query2 = {"stationid": "1045"}  #***replace "1045" with 'stationNum'***
+query2 = {"stationid": stationNum}  
 station = db.stations.find_one(query2)
 length = station['length']
+date = "2011-09-15"
 
 #query all loopdata for station id and for sept 21, 2011
-readings = db.loopdata.find({"stationid": '1045', "date": '2011-09-15'}).sort("time")  #***replace '1045' with 'station' and '2011-09-22'***
+readings = db.loopdata.find({"stationid": stationNum, "date": date}).sort("time")  #***replace '1045' with 'station' and '2011-09-22'***
 for reading in readings:
     newIntvl = False
     lastIntvl = False
     timestamp = reading['time']
     minutes = timestamp[3:5]
     seconds = timestamp[6:8]
-    print(reading)
+    #print(reading)
 
     if(int(minutes) % 5 == 0) and seconds == '00':
         newIntvl = True
@@ -95,10 +100,9 @@ for reading in readings:
 #        print("TotSpeeds:", totSpeeds, "Counter:", counter)  #debug
 
     if lastIntvl:
-        if counter > 0 and avgSpeed > 0:
-            avgSpeed = totSpeeds / counter
-            time = (float(length) / avgSpeed) * 3600
-            intvlList.append(tuple((intvlTime, time)))
+        avgSpeed = totSpeeds / counter
+        time = (float(length) / avgSpeed) * 3600
+        intvlList.append(tuple((intvlTime, time)))
 
 #make sure we capture the last reading
 if not lastIntvl:
@@ -108,8 +112,8 @@ if not lastIntvl:
         intvlList.append(tuple((intvlTime, time)))
 
 print("\n Interval Time")
-for i in range(len(intvlList)):
-    print(intvlList[i])
+for intvl in intvlList:
+    print(intvl)
 
 
 print ("#---------------------------------------------#")
