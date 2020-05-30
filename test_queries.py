@@ -19,7 +19,7 @@ usr = "root"
 psswrd = "super!secret"
 
 client = pymongo.MongoClient("mongodb://" + usr + ":" + psswrd + "@" + ip + ":27017/")
-db = client.freemongo
+db = client.freeway
 print ("\n###############################################")
 #print ("#---------------------------------------------#\n")
 # print all loopdata - for testing/verification
@@ -197,6 +197,28 @@ print ("#---------------------------------------------#")
 # QUERY 6 - Route Finding: Find a route from Johnson Creek to Columbia Blvd on I-205 NB using the upstream and downstream fields.
 print("Query 6")
 
+startLocation = {"locationtext": "Johnson Cr NB"}
+detectors = db.stations.find_one(startLocation)
+startStationID = detectors['stationid']
+
+endLocation = {"locationtext": "Columbia to I-205 NB"}
+detectors = db.stations.find_one(endLocation)
+endStationID = detectors['stationid']
+
+path = []
+
+currentStation = startStationID
+
+while (currentStation != endStationID) and (currentStation != 0):
+    currentLocation = db.stations.find_one({"stationid": currentStation})
+    path.append(currentLocation['locationtext'])
+    currentStation = currentLocation['downstream']
+
+currentLocation = db.stations.find_one({"stationid": currentStation})
+path.append(currentLocation['locationtext'])
+
+print("The path from 'Johnson Cr NB' to 'Columbia to I-205 NB' is:")
+print(path)
 
 print ("#---------------------------------------------#")
 print ("###############################################\n")
