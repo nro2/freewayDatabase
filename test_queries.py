@@ -6,6 +6,7 @@
 
 import pymongo, sys
 from pprint import pprint
+import pandas as pd
 
 try:
     ip = "35.236.54.92"
@@ -71,67 +72,68 @@ print ("#---------------------------------------------#")
 # Report travel time in seconds.
 print("Query 3")
 
-intvlList = []
-counter = 0
-totSpeeds = 0
-avgSpeed = 0
-intvlTime = 0
-lastIntvl = False
+
+class bucket():
+    def __init__(self, intvl):
+        self.intvl = intvl
+        self.spdSum = 0
+        self.counter = 0
+
+spdBuckets = []  #24hours x 12 interval buckets to accummulate speeds
+intvlList = []  #list of all time intervals
+
+#set up spdBuckets array
+intvls = pd.timedelta_range(0, periods = 288, freq='5Min')
+for i in intvls:
+    intvl = str(i)[7:12]
+    spdBuckets.append(bucket(intvl))
 
 #find stationid for "Foster NB"
 query = {"locationtext": "Foster NB"}
 detectors = db.detectors.find_one(query)
-stationNum = detectors['stationid'] #***replace "1045" with 'stationNum'***
+stationNum = detectors['stationid']
 
 query2 = {"stationid": stationNum}  
 station = db.stations.find_one(query2)
 length = station['length']
-date = "2011-10-20"
+date = "2011-10-20"  #***replace with '2011-09-22'
 
-#query all loopdata for station id and for sept 21, 2011
-readings = db.loopdata.find({"stationid": stationNum, "date": date}).sort("time")  #***replace '1045' with 'station' and '2011-09-22'***
+cur = 0  #current bucket
+
+#query all loopdata for station id and for sept 22, 2011
+readings = db.loopdata.find({"stationid": stationNum, "date": date}).sort("time")
 for reading in readings:
-    newIntvl = False
-    lastIntvl = False
-    timestamp = reading['time']
-    minutes = timestamp[3:5]
-    seconds = timestamp[6:8]
-    #print(reading)
+    timestamp = str(reading['time'])[:5]  #the timestamp, as read
+    roundedTime = None
 
-    if(int(minutes) % 5 == 0) and seconds == '00':
-        newIntvl = True
-#        print("***newIntvl***")  #debug
-    elif(int(minutes) % 5 == 4) and seconds == '40':
-        lastIntvl = True
-#        print("***lastIntvl***")  #debug
-
-#    print("Minutes:", minutes)  #debug
-#    print("Seconds:", seconds)  #debug
-   
-    if newIntvl:
-        totSpeeds = 0
-        counter = 0
-        intvlTime = timestamp
+    #round timestamp to the nearest interval
+    if int(timestamp[4]) >= 0 and int(timestamp[4]) < 5:
+        roundedTime = timestamp[:4] + '0'
+    else:
+        roundedTime = timestamp[:4] + '5'
 
     if reading['speed'] != '':
-        totSpeeds += (int(reading['speed']) * int(reading['volume']))
-        counter += int(reading['volume'])
-#        print("TotSpeeds:", totSpeeds, "Counter:", counter)  #debug
+        #find the correct bucket to add the speed to -- since timestamps are sorted, no need to start over from 0 each time
+        while spdBuckets[cur].intvl != roundedTime:
+            cur += 1
 
-    if lastIntvl:
-        avgSpeed = totSpeeds / counter
-        time = (float(length) / avgSpeed) * 3600
-        intvlList.append(tuple((intvlTime, round(time, 4))))
+        #can't simply add speed and increment counter by 1; must add speed x volume to properly calculate avg
+        spdBuckets[cur].spdSum += (int(reading['speed']) * int(reading['volume']))
+        spdBuckets[cur].counter += int(reading['volume'])
 
-#make sure we capture the last reading
-if not lastIntvl:
-    if counter > 0 and avgSpeed > 0:
-        avgSpeed = totSpeeds / counter
-        time = (float(length) / avgSpeed) * 3600
-        intvlList.append(tuple((intvlTime, round(time, 4))))
+#calculate averages for each bucket
+for bucket in spdBuckets:
+    if bucket.counter > 0:
+        avgSpd = bucket.spdSum / bucket.counter
+        time = (length / avgSpd) * 3600
+        intvlList.append(tuple((bucket.intvl, time)))
+    #if no volume recorded for current interval
+    else:
+        intvlList.append(tuple((bucket.intvl, 'no readings')))
 
+#print intervals and times
 print("\n", date, "  ", stationNum)
-print("Time Interval,  Travel Time")
+print("Interval,  Travel Time")
 for intvl in intvlList:
     print(intvl)
 
