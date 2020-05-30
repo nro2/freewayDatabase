@@ -19,7 +19,7 @@ usr = "root"
 psswrd = "super!secret"
 
 client = pymongo.MongoClient("mongodb://" + usr + ":" + psswrd + "@" + ip + ":27017/")
-db = client.freeway
+db = client.freemongo
 print ("\n###############################################")
 #print ("#---------------------------------------------#\n")
 # print all loopdata - for testing/verification
@@ -155,11 +155,11 @@ station = {"stationid": stationID}
 stations = db.stations.find_one(station)
 stationLength = stations['length']
 
-window1Lower = '18:00:40-07'
-window1Upper = '18:03:20-07'
+window1Lower = '07:00:00-07'
+window1Upper = '09:00:00-07'
 
-window2Lower = '17:42:30-07'
-window2Upper = '17:43:20-07'
+window2Lower = '16:00:00-07'
+window2Upper = '18:00:00-07'
 
 def calculateAverage(windowLower, windowUpper, stationLength): 
     count = 0
@@ -181,8 +181,8 @@ def calculateAverage(windowLower, windowUpper, stationLength):
 
     return (stationLength/(sum(speeds)/count)) * 3600
 
-average1 = calculateAverage(window1Lower, window1Upper, stationLength)
-average2 = calculateAverage(window2Lower, window2Upper, stationLength)
+average1 = round(calculateAverage(window1Lower, window1Upper, stationLength), 2)
+average2 = round(calculateAverage(window2Lower, window2Upper, stationLength), 2)
 
 print(average1, "Is the average travel time for Foster NB from ", window1Lower, "to", window1Upper)
 print(average2, "Is the average travel time for Foster NB from ", window2Lower, "to", window2Upper)
