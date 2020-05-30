@@ -7,7 +7,12 @@
 import pymongo, sys
 from pprint import pprint
 
-ip = sys.argv[1]
+try:
+    ip = "35.236.54.92"
+    #ip = sys.argv[1]
+except:
+    print("Must provide DB IP-Address as first argument")
+    exit(1)
 
 usr = "root"
 psswrd = "super!secret"
