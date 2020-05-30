@@ -131,11 +131,15 @@ for bucket in spdBuckets:
     else:
         intvlList.append(tuple((bucket.intvl, 'no readings')))
 
+
 #print intervals and times
 print("\n", date, "  ", stationNum)
 print("Interval,  Travel Time")
 for intvl in intvlList:
-    print(intvl)
+    if intvl[1] != 'no readings':
+        print(intvl[0], "     {:0.3f}".format(intvl[1]))
+    else:    
+        print(intvl[0], "    ", intvl[1])
 
 
 print ("#---------------------------------------------#")
