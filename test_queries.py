@@ -19,7 +19,7 @@ usr = "root"
 psswrd = "super!secret"
 
 client = pymongo.MongoClient("mongodb://" + usr + ":" + psswrd + "@" + ip + ":27017/")
-db = client.freeway 
+db = client.freemongo
 print ("\n###############################################")
 #print ("#---------------------------------------------#\n")
 # print all loopdata - for testing/verification
@@ -126,7 +126,7 @@ for bucket in spdBuckets:
     if bucket.counter > 0:
         avgSpd = bucket.spdSum / bucket.counter
         time = (length / avgSpd) * 3600
-        intvlList.append(tuple((bucket.intvl, time)))
+        intvlList.append(tuple((bucket.intvl, round(time,4))))
     #if no volume recorded for current interval
     else:
         intvlList.append(tuple((bucket.intvl, 'no readings')))
