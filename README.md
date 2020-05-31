@@ -3,5 +3,7 @@ Cloud MongoDB - PDX Freeway analysis
 
 
 Nick Robinson
+
 Scott Rubey
+
 Seth Seeman
