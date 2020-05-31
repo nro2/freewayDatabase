@@ -34,7 +34,7 @@ def db_connect(ip):
         # connect to remote MongoDB server
         client = pymongo.MongoClient("mongodb://" + user + ":" + password + "@" + ip + ":27017/")
         # connect to database "freeway"
-        db = client["freemongo"]
+        db = client["freemonster"]
         return db
 
 #-------------------------------------------------------#
@@ -153,13 +153,14 @@ def import_loopdata(db, loopdata_file):
                 i = 0
                 for line in csv_reader:
                         # find reference documents
+                        hw_id = 0
+                        st_id = 0
                         results = db.detectors.count_documents({"detectorid": check_int(line[0])})
-                        if results == 0:
-                            continue
-                        detector = dict(db.detectors.find({"detectorid": check_int(line[0])})[0])
-                        dt_ref = detector['_id']
-                        hw_id = detector['highwayid']
-                        st_id = detector['stationid']
+                        if results > 0:
+                                detector = dict(db.detectors.find({"detectorid": check_int(line[0])})[0])
+                                #detector = db.detectors.find_one({"detectorid": check_int(line[0])})
+                                hw_id = detector['highwayid']
+                                st_id = detector['stationid']
                         
                         # split date and time into two attributes
                         parsed = str(line[1]).split(' ')
@@ -171,7 +172,7 @@ def import_loopdata(db, loopdata_file):
         
                         # create reading dict (schema) from input line
                         reading_dict = { "detectorid" : check_int(line[0]),
-                                        # probably need to figure our datetime formatting in Mongo
+                                        # probably need to figure out datetime formatting in Mongo
                                         "starttime" : str(line[1]), # milliseconds_since_epoch, 
                                         "date": date,
                                         "time": time,
@@ -181,13 +182,13 @@ def import_loopdata(db, loopdata_file):
                                         "status" : check_int(line[5]),
                                         "dqflags" : check_int(line[6]),
                                         # reference _ids 
-                                        #"detectorref" : str(dt_ref),
                                         "stationid": int(st_id),
                                         "highwayid": int(hw_id)
                         }
                         result = loopdata.insert_one(reading_dict)
                         # limit number of imports for testing
                         i += 1
+                        print(i)
                         if i % 10000 == 0:
                                 print(i)
                         #if i % 100 == 0:
@@ -223,8 +224,8 @@ def main():
         detector_file = data_dir + "/detectors.csv"
         station_file = data_dir + "/stations.csv"
         highway_file = data_dir + "/highways.csv"
-        #loopdata_file = data_dir + "/freeway100k_sample.csv"
-        loopdata_file = data_dir + "../../freeway_data/freeway_loopdata.csv"
+        loopdata_file = data_dir + "/freeway100k_sample.csv"
+        #loopdata_file = data_dir + "../../freeway_data/freeway_loopdata.csv"
         # import data into MongoDB collections from csv files
         import_highways(db, highway_file)
         import_stations(db, station_file)

@@ -19,14 +19,14 @@ usr = "root"
 psswrd = "super!secret"
 
 client = pymongo.MongoClient("mongodb://" + usr + ":" + psswrd + "@" + ip + ":27017/")
-db = client.freemongo
+db = client.freeway
 print ("\n###############################################")
 #print ("#---------------------------------------------#\n")
 # print all loopdata - for testing/verification
 #query = {"stationid":'1047'}
-#readings = db.loopdata.find(query)
+#readings = db.loopdata.find()#query)
 #for reading in readings:
-#    print(reading)
+    #print(reading)
     
 count = db.loopdata.count()
 print("Total Readings: " + str(count))
