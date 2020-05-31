@@ -179,6 +179,9 @@ def calculateAverage(windowLower, windowUpper, stationLength):
             speeds.append(reading['speed'])
             count += 1
 
+    if count <= 0:
+        return 0
+        
     return (stationLength/(sum(speeds)/count)) * 3600
 
 average1 = round(calculateAverage(window1Lower, window1Upper, stationLength), 2)
