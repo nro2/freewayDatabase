@@ -172,8 +172,7 @@ def import_loopdata(db, loopdata_file):
         
                         # create reading dict (schema) from input line
                         reading_dict = { "detectorid" : check_int(line[0]),
-                                        # probably need to figure out datetime formatting in Mongo
-                                        "starttime" : str(line[1]), # milliseconds_since_epoch, 
+                                        "starttime" : str(line[1]),
                                         "date": date,
                                         "time": time,
                                         "volume": check_int(line[2]), 

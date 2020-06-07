@@ -159,7 +159,7 @@ windowPreUpper = '07:00:00-07'
 window1Lower = '07:00:00-07'
 window1Upper = '09:00:00-07'
 
-windowMiddle1Lower = '9:00:00-07'
+windowMiddle1Lower = '09:00:00-07'
 windowMiddle1Lower = '11:00:00-07'
 
 windowMiddle2Lower = '02:00:00-07'
