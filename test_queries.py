@@ -153,19 +153,34 @@ station = {"stationid": stationID}
 stations = db.stations.find_one(station)
 stationLength = stations['length']
 
+windowPreLower = '05:00:00-07'
+windowPreUpper = '07:00:00-07'
+
 window1Lower = '07:00:00-07'
 window1Upper = '09:00:00-07'
+
+windowMiddle1Lower = '9:00:00-07'
+windowMiddle1Lower = '11:00:00-07'
+
+windowMiddle2Lower = '02:00:00-07'
+windowMiddle2Lower = '04:00:00-07'
 
 window2Lower = '16:00:00-07'
 window2Upper = '18:00:00-07'
 
+windowPost1Lower = '18:00:00-07'
+windowPost1Upper = '20:00:00-07'
+
+windowPost2Lower = '22:00:00-07'
+windowPost2Upper = '24:00:00-07'
+
 def calculateAverage(windowLower, windowUpper, stationLength): 
     count = 0
-    speeds = []
+    speeds = 0
 
     readings = db.loopdata.find({
         "stationid": stationID,
-        "date": '2011-10-28',
+        "date": '2011-10-22',
         "time": {
             "$gte": windowLower,
             "$lte": windowUpper
@@ -174,13 +189,13 @@ def calculateAverage(windowLower, windowUpper, stationLength):
 
     for reading in readings:
         if reading['speed'] is not '':
-            speeds.append(reading['speed'] * reading['volume'])
+            speeds += (reading['speed'] * reading['volume'])
             count += reading['volume']
 
     if count <= 0:
         return 0
         
-    return (stationLength/(sum(speeds)/count)) * 3600
+    return (stationLength/(speeds/count)) * 3600
 
 average1 = round(calculateAverage(window1Lower, window1Upper, stationLength), 2)
 average2 = round(calculateAverage(window2Lower, window2Upper, stationLength), 2)
