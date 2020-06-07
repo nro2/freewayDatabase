@@ -161,12 +161,12 @@ window1Lower = '07:00:00-07'
 window1Upper = '09:00:00-07'
 count1 = 0
 
-windowMiddle1Lower = '9:00:00-07'
+windowMiddle1Lower = '09:00:00-07'
 windowMiddle1Upper = '11:00:00-07'
 countMiddle1 = 0
 
-windowMiddle2Lower = '02:00:00-07'
-windowMiddle2Upper = '04:00:00-07'
+windowMiddle2Lower = '14:00:00-07'
+windowMiddle2Upper = '16:00:00-07'
 countMiddle2 = 0
 
 window2Lower = '16:00:00-07'
@@ -186,7 +186,7 @@ def calculateAverage(windowLower, windowUpper, stationLength, count):
 
     readings = db.loopdata.find({
         "stationid": stationID,
-        "date": '2011-10-22',
+        "date": '2011-09-22',
         "time": {
             "$gte": windowLower,
             "$lte": windowUpper
@@ -198,8 +198,6 @@ def calculateAverage(windowLower, windowUpper, stationLength, count):
             speeds += (reading['speed'] * reading['volume'])
             count += reading['volume']
             
-    print(speeds, "is speeds")
-    print(count, "Is count")
     if count <= 0:
         return 0
         
