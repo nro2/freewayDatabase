@@ -155,32 +155,38 @@ stationLength = stations['length']
 
 windowPreLower = '05:00:00-07'
 windowPreUpper = '07:00:00-07'
+countPre = 0
 
 window1Lower = '07:00:00-07'
 window1Upper = '09:00:00-07'
+count1 = 0
 
 windowMiddle1Lower = '09:00:00-07'
-windowMiddle1Lower = '11:00:00-07'
+windowMiddle1Upper = '11:00:00-07'
+countMiddle1 = 0
 
-windowMiddle2Lower = '02:00:00-07'
-windowMiddle2Lower = '04:00:00-07'
+windowMiddle2Lower = '14:00:00-07'
+windowMiddle2Upper = '16:00:00-07'
+countMiddle2 = 0
 
 window2Lower = '16:00:00-07'
 window2Upper = '18:00:00-07'
+count2 = 0
 
 windowPost1Lower = '18:00:00-07'
 windowPost1Upper = '20:00:00-07'
+countPost1 = 0
 
 windowPost2Lower = '22:00:00-07'
 windowPost2Upper = '24:00:00-07'
+countPost2 = 0
 
-def calculateAverage(windowLower, windowUpper, stationLength): 
-    count = 0
+def calculateAverage(windowLower, windowUpper, stationLength, count): 
     speeds = 0
 
     readings = db.loopdata.find({
         "stationid": stationID,
-        "date": '2011-10-22',
+        "date": '2011-09-22',
         "time": {
             "$gte": windowLower,
             "$lte": windowUpper
@@ -191,17 +197,27 @@ def calculateAverage(windowLower, windowUpper, stationLength):
         if reading['speed'] is not '':
             speeds += (reading['speed'] * reading['volume'])
             count += reading['volume']
-
+            
     if count <= 0:
         return 0
         
     return (stationLength/(speeds/count)) * 3600
 
-average1 = round(calculateAverage(window1Lower, window1Upper, stationLength), 2)
-average2 = round(calculateAverage(window2Lower, window2Upper, stationLength), 2)
+averagePre = round(calculateAverage(windowPreLower, windowPreUpper, stationLength, countPre), 2)
+average1 = round(calculateAverage(window1Lower, window1Upper, stationLength, count1), 2)
+averageMiddle1 = round(calculateAverage(windowMiddle1Lower, windowMiddle1Upper, stationLength, countMiddle1), 2)
+averageMiddle2 = round(calculateAverage(windowMiddle2Lower, windowMiddle2Upper, stationLength, countMiddle2), 2)
+average2 = round(calculateAverage(window2Lower, window2Upper, stationLength, count2), 2)
+averagePost1 = round(calculateAverage(windowPost1Lower, windowPost1Upper, stationLength, countPost1), 2)
+averagePost2 = round(calculateAverage(windowPost2Lower, windowPost2Upper, stationLength, countPost2), 2)
 
+print(averagePre, "Is the average travel time for Foster NB from ", windowPreLower, "to", windowPreUpper)
 print(average1, "Is the average travel time for Foster NB from ", window1Lower, "to", window1Upper)
+print(averageMiddle1, "Is the average travel time for Foster NB from ", windowMiddle1Lower, "to", windowMiddle1Upper)
+print(averageMiddle2, "Is the average travel time for Foster NB from ", windowMiddle2Lower, "to", windowMiddle2Upper)
 print(average2, "Is the average travel time for Foster NB from ", window2Lower, "to", window2Upper)
+print(averagePost1, "Is the average travel time for Foster NB from ", windowPost1Lower, "to", windowPost1Upper)
+print(averagePost2, "Is the average travel time for Foster NB from ", windowPost2Lower, "to", windowPost2Upper)
 
 
 print ("#---------------------------------------------#")
