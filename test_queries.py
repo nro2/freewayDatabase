@@ -19,7 +19,7 @@ usr = "root"
 psswrd = "super!secret"
 
 client = pymongo.MongoClient("mongodb://" + usr + ":" + psswrd + "@" + ip + ":27017/")
-db = client.freeway
+db = client.freemonster
 print ("\n###############################################")
 #print ("#---------------------------------------------#\n")
 # print all loopdata - for testing/verification
@@ -29,17 +29,17 @@ print ("\n###############################################")
     #print(reading)
     
 count = db.loopdata.count()
-print("Total Readings: " + str(count))
+print("Total Loopdata Readings: " + str(count))
 count = db.detectors.count()
-print("Total Detectors: " + str(count))
+print("Known Detectors: " + str(count))
 count = db.loopdata.distinct("detectorid")
 print("Found Detectors: " + str(len(count)) + " " + str(count))
 count = db.stations.count()
-print("Total Stations: " + str(count))
+print("Known Stations: " + str(count))
 count = db.loopdata.distinct("stationid")
 print("Found Stations: " + str(len(count)) + " " + str(count))
 count = db.highways.count()
-print("Total Highways: " + str(count))
+print("Known Highways: " + str(count))
 count = db.loopdata.distinct("highwayid")
 print("Found Highways: " + str(len(count)) + " " + str(count) + '\n')
     
@@ -53,11 +53,11 @@ print ("#---------------------------------------------#")
 # QUERY 2 - Volume: Find the total volume for the station Foster NB for Sept 21, 2011.
 print("Query 2")
 # find station id for Foster NB
-query = {"locationtext": "Foster NB"}
-detectors = db.detectors.find_one(query)
-station =  detectors['stationid']
-#rint(station)
-date = '2011-10-20'
+station_text = "Foster NB"
+query = {"locationtext": station_text}
+results = db.stations.find_one({"locationtext": station_text}, {"stationid" : 1})
+station =  results['stationid']
+date = '2011-09-21'
 # query all loopdata for station id and for sept 21, 2011 - return volume 
 readings = db.loopdata.find({"stationid": station, "date": date},{"volume" : 1})
 total = 0
@@ -65,13 +65,14 @@ for reading in readings:
     if reading['volume'] != '':
         # sum volumes
         total += int(reading['volume'])
+print ("Station: " + station_text + " (ID: " + str(station) + ")")
+print("Date: " + date)
 print("Volume: " + str(total))
 
 print ("#---------------------------------------------#")
 # QUERY 3 - Single-Day Station Travel Times: Find travel time for station Foster NB for 5-minute intervals for Sept 22, 2011. 
 # Report travel time in seconds.
 print("Query 3")
-
 
 class bucket():
     def __init__(self, intvl):
@@ -92,20 +93,19 @@ for i in intvls:
 query = {"locationtext": "Foster NB"}
 detectors = db.detectors.find_one(query)
 stationNum = detectors['stationid']
-
+# find station length
 query2 = {"stationid": stationNum}  
 station = db.stations.find_one(query2)
 length = station['length']
-date = "2011-10-20"  #***replace with '2011-09-22'
+# set date 
+date = '2011-09-22'
 
 cur = 0  #current bucket
-
 #query all loopdata for station id and for sept 22, 2011
 readings = db.loopdata.find({"stationid": stationNum, "date": date}).sort("time")
 for reading in readings:
     timestamp = str(reading['time'])[:5]  #the timestamp, as read
     roundedTime = None
-
     #round timestamp to the nearest interval
     if int(timestamp[4]) >= 0 and int(timestamp[4]) < 5:
         roundedTime = timestamp[:4] + '0'
@@ -116,7 +116,6 @@ for reading in readings:
         #find the correct bucket to add the speed to -- since timestamps are sorted, no need to start over from 0 each time
         while spdBuckets[cur].intvl != roundedTime:
             cur += 1
-
         #can't simply add speed and increment counter by 1; must add speed x volume to properly calculate avg
         spdBuckets[cur].spdSum += (int(reading['speed']) * int(reading['volume']))
         spdBuckets[cur].counter += int(reading['volume'])
@@ -131,16 +130,15 @@ for bucket in spdBuckets:
     else:
         intvlList.append(tuple((bucket.intvl, 'no readings')))
 
-
 #print intervals and times
-print("\n", date, "  ", stationNum)
+print ("Station: Foster NB (ID: " + str(stationNum) + ")")
+print("Date: " + date)
 print("Interval,  Travel Time")
 for intvl in intvlList:
     if intvl[1] != 'no readings':
         print(intvl[0], "     {:0.3f}".format(intvl[1]))
     else:    
         print(intvl[0], "    ", intvl[1])
-
 
 print ("#---------------------------------------------#")
 # QUERY 4 - Peak Period Travel Times: Find the average travel time for 7-9AM and 4-6PM on September 22, 2011 for station Foster NB. 
