@@ -176,8 +176,8 @@ def calculateAverage(windowLower, windowUpper, stationLength):
 
     for reading in readings:
         if reading['speed'] is not '':
-            speeds.append(reading['speed'])
-            count += 1
+            speeds.append(reading['speed'] * reading['volume'])
+            count += reading['volume']
 
     if count <= 0:
         return 0
