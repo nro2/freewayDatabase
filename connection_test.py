@@ -10,7 +10,7 @@ from pprint import pprint
 ip = sys.argv[1]
 
 usr = "root"
-psswrd = "super!secret"
+psswrd = " "
 
 client = pymongo.MongoClient("mongodb://" + usr + ":" + psswrd + "@" + ip + ":27017/")
 db = client.freeway 

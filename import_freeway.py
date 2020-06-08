@@ -29,7 +29,7 @@ def read_input():
 def db_connect(ip):
         # need to figure out how to get environment variables to do this
         user = "root"         #str(os.environ.get('USER'))
-        password = "super!secret"     #str(os.environ.get('PASSWORD'))
+        password = " "     #str(os.environ.get('PASSWORD'))
 
         # connect to remote MongoDB server
         client = pymongo.MongoClient("mongodb://" + user + ":" + password + "@" + ip + ":27017/")
